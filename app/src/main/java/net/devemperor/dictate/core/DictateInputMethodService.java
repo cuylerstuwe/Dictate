@@ -1142,8 +1142,13 @@ public class DictateInputMethodService extends InputMethodService {
             if (state == AudioManager.SCO_AUDIO_STATE_CONNECTED) {
                 // Bluetooth SCO is now connected and can be used
                 Log.d("DictateInputMethodService", "Bluetooth SCO connected");
+                isBluetoothScoStarted = true; // Set flag only when actually connected
             } else if (state == AudioManager.SCO_AUDIO_STATE_DISCONNECTED) {
                 Log.d("DictateInputMethodService", "Bluetooth SCO disconnected");
+                isBluetoothScoStarted = false; // Reset flag on disconnect
+            } else if (state == AudioManager.SCO_AUDIO_STATE_ERROR) {
+                Log.e("DictateInputMethodService", "Bluetooth SCO connection error");
+                isBluetoothScoStarted = false; // Reset flag on error
             }
         }
     };
@@ -1157,14 +1162,17 @@ public class DictateInputMethodService extends InputMethodService {
         AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         audioManager.startBluetoothSco();
         audioManager.setBluetoothScoOn(true);
-        isBluetoothScoStarted = true;
+        // isBluetoothScoStarted = true; // Removed: State will be set by receiver
     }
     
     private void stopBluetoothSco() {
         AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        audioManager.stopBluetoothSco();
-        audioManager.setBluetoothScoOn(false);
-        isBluetoothScoStarted = false;
+        // Check actual state before stopping
+        if (audioManager.isBluetoothScoOn()) {
+            audioManager.stopBluetoothSco();
+            audioManager.setBluetoothScoOn(false);
+        }
+        isBluetoothScoStarted = false; // Always reset our internal flag
     }
 
 }
