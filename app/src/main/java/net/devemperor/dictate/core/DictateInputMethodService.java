@@ -208,6 +208,9 @@ public class DictateInputMethodService extends InputMethodService {
         recordTimeRunnable = new Runnable() {  // runnable to update the record button time text
             @Override
             public void run() {
+                if (!isRecording) { // Check if recording is still active
+                    return; // Do nothing if not recording
+                }
                 elapsedTime += 100;
                 recordButton.setText(getString(R.string.dictate_send,
                         String.format(Locale.getDefault(), "%02d:%02d", (int) (elapsedTime / 60000), (int) (elapsedTime / 1000) % 60)));
